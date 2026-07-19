@@ -15,6 +15,7 @@ from sklearn.metrics import f1_score
 from transformers import (
     AutoModelForSequenceClassification,
     AutoTokenizer,
+    DataCollatorWithPadding,
     Trainer,
     TrainingArguments,
 )
@@ -64,6 +65,9 @@ trainer = Trainer(
     args=args,
     train_dataset=ds["train"],
     eval_dataset=ds["validation"],
+    # pads each batch to its longest sequence so tensors stack; without this
+    # variable-length examples crash the default collator
+    data_collator=DataCollatorWithPadding(tokenizer),
     compute_metrics=compute_metrics,
 )
 
