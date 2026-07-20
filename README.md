@@ -14,6 +14,7 @@ Six classes (sadness, joy, love, anger, fear, surprise) from
 | Model | Accuracy | Macro F1 |
 |---|---|---|
 | TF-IDF + Logistic Regression (`class_weight=balanced`) | 86.9% | 0.834 |
+| TF-IDF + XGBoost | 89.7% | 0.846 |
 | Fine-tuned DistilBERT | **92.7%** | **0.882** |
 
 The transformer's biggest wins are on the classes the bag-of-words model
@@ -30,7 +31,9 @@ to read that F1 precisely.
 3. `train.py` — fine-tune DistilBERT with the Hugging Face `Trainer`
    (PyTorch, Apple Silicon MPS)
 4. `evaluate.py` — single final comparison on the test split
+   (linear → gradient-boosted trees → transformer)
 5. `serve.py` — FastAPI endpoint serving the fine-tuned model
+6. `app.py` — Streamlit demo UI (`uv run streamlit run app.py`)
 
 ## Run it
 
@@ -51,4 +54,8 @@ curl -s localhost:8000/predict -X POST -H 'content-type: application/json' \
 ## Stack
 
 Python 3.12 · uv · PyTorch · Hugging Face `transformers` + `datasets` ·
-scikit-learn · pandas · FastAPI
+scikit-learn · XGBoost · pandas · FastAPI · Streamlit
+
+macOS note: XGBoost needs `brew install libomp`, and `evaluate.py` deliberately
+imports torch only after XGBoost training — loading both OpenMP runtimes at
+once segfaults (see comment in `evaluate.py`).
