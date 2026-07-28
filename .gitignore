@@ -10,3 +10,4 @@ wheels/
 .venv
 checkpoints/
 model/
+.DS_Store
