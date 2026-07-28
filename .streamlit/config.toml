@@ -1,0 +1,7 @@
+[server]
+# Streamlit's watcher walks every imported module to detect edits. That includes
+# all of transformers' image/video models, which import torchvision — not
+# installed here (this project is text-only), so each one prints a traceback on
+# startup. We don't need hot-reload for a demo app; turning the watcher off
+# silences ~100 harmless ModuleNotFoundError dumps.
+fileWatcherType = "none"
