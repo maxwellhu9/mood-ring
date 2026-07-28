@@ -22,6 +22,38 @@ confuses: love (F1 .74 → .83) and fear (.79 → .90). Surprise (3.6% of
 training data) stays hardest for both — 66 test examples is also too few
 to read that F1 precisely.
 
+## Limitations
+
+**92.7% means 92.7% on tweets that look like these tweets.** Two failure modes
+found by poking at the demo:
+
+*Negation flips right past the model.*
+
+| input | prediction |
+|---|---|
+| `i feel bad` | sadness 99% ✓ |
+| `i dont feel good` | **joy 99%** ✗ |
+| `i am not doing well at all` | **joy 98%** ✗ |
+
+This is a training-data artifact, not a model bug. Of the 55 training sentences
+matching `not/dont … good/happy/well`, **32 are labeled joy** — including
+`[joy] "im not feeling joyful or spiritually fit"`. The labels describe the
+emotion of the *whole original tweet*, which often resolves positively, so the
+model learned "negation + positive word → joy" and learned it correctly from
+the evidence available. No amount of extra compute fixes this; the data caps
+the ceiling.
+
+*Short inputs are out of distribution.* The median training sentence is 17
+words and 34.6% begin with "i feel". A two-word input like `not good` is
+unlike anything in training. Notably, padding it into the familiar shape
+(`i feel not good`) makes the model *more* confident and *still* wrong —
+66% → 99% — so confidence here tracks familiarity of phrasing rather than
+correctness.
+
+Both would be worth fixing before trusting this anywhere real: audit the
+negation examples, and either relabel them or train on phrase-level rather
+than tweet-level annotations.
+
 ## Pipeline
 
 1. `explore.py` — look at the data first (class balance, lengths, examples)
@@ -59,3 +91,6 @@ scikit-learn · XGBoost · pandas · FastAPI · Streamlit
 macOS note: XGBoost needs `brew install libomp`, and `evaluate.py` deliberately
 imports torch only after XGBoost training — loading both OpenMP runtimes at
 once segfaults (see comment in `evaluate.py`).
+
+[`NOTES.md`](NOTES.md) explains every concept and tool used here in plain
+language — TF-IDF through fine-tuning, plus the gotchas hit along the way.
