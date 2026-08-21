@@ -54,6 +54,24 @@ Both would be worth fixing before trusting this anywhere real: audit the
 negation examples, and either relabel them or train on phrase-level rather
 than tweet-level annotations.
 
+## Emotional arcs of novels
+
+`arcs.py` scores every sentence of three Project Gutenberg books and plots
+smoothed positivity (joy + love − sadness − anger − fear) across the narrative,
+centered on each book's own average.
+
+![emotional arcs](arcs.png)
+
+Mean positivity ranks the books correctly despite the model never having seen
+19th-century prose: *Pride and Prejudice* +0.137, *Dracula* −0.073,
+*Frankenstein* −0.084 — romance above both horror novels.
+
+The absolute levels are not trustworthy, though. On out-of-distribution text
+the model falls back on its training prior, so **joy is the most common
+predicted label for all three books, including Dracula.** Joy is 33.5% of the
+fine-tuning data; when the model has no idea, it guesses joy. The relative
+shape of each arc survives this bias, the raw levels do not.
+
 ## Pipeline
 
 1. `explore.py` — look at the data first (class balance, lengths, examples)
@@ -66,6 +84,7 @@ than tweet-level annotations.
    (linear → gradient-boosted trees → transformer)
 5. `serve.py` — FastAPI endpoint serving the fine-tuned model
 6. `app.py` — Streamlit demo UI (`uv run streamlit run app.py`)
+7. `arcs.py` — applies the model to public-domain novels (`uv run arcs.py`)
 
 ## Run it
 
