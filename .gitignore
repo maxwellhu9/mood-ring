@@ -11,3 +11,4 @@ wheels/
 checkpoints/
 model/
 .DS_Store
+data/
